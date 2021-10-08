@@ -1,0 +1,60 @@
+From 01ae3f4157d01939ac9b51627f493fe6c21e8c44 Mon Sep 17 00:00:00 2001
+From: Tianjie <xunchang@google.com>
+Date: Wed, 1 Apr 2020 17:04:09 -0700
+Subject: [PATCH] Change the parameter type of offset in read
+
+As we support zip64 in libziparchive, we change the parameter of
+the ReadAtOffset() in zip reader from uin32_t to off64_t. So the
+derived class needs to be updated as well.
+
+Bug: 150900468
+Test: build
+Change-Id: Icbfd2dd54b01ff62da988ba8598c1057f9bb6368
+---
+ libs/androidfw/ZipUtils.cpp | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/libs/androidfw/ZipUtils.cpp b/libs/androidfw/ZipUtils.cpp
+index 5be2105fe404a..568e3b63d67f3 100644
+--- a/libs/androidfw/ZipUtils.cpp
++++ b/libs/androidfw/ZipUtils.cpp
+@@ -40,7 +40,7 @@ class FileReader : public zip_archive::Reader {
+     explicit FileReader(FILE* fp) : Reader(), mFp(fp), mCurrentOffset(0) {
+     }
+ 
+-    bool ReadAtOffset(uint8_t* buf, size_t len, uint32_t offset) const {
++    bool ReadAtOffset(uint8_t* buf, size_t len, off64_t offset) const {
+         // Data is usually requested sequentially, so this helps avoid pointless
+         // fseeks every time we perform a read. There's an impedence mismatch
+         // here because the original API was designed around pread and pwrite.
+@@ -63,7 +63,7 @@ class FileReader : public zip_archive::Reader {
+ 
+   private:
+     FILE* mFp;
+-    mutable uint32_t mCurrentOffset;
++    mutable off64_t mCurrentOffset;
+ };
+ 
+ class FdReader : public zip_archive::Reader {
+@@ -71,8 +71,8 @@ class FdReader : public zip_archive::Reader {
+     explicit FdReader(int fd) : mFd(fd) {
+     }
+ 
+-    bool ReadAtOffset(uint8_t* buf, size_t len, uint32_t offset) const {
+-      return android::base::ReadFullyAtOffset(mFd, buf, len, static_cast<off_t>(offset));
++    bool ReadAtOffset(uint8_t* buf, size_t len, off64_t offset) const {
++      return android::base::ReadFullyAtOffset(mFd, buf, len, offset);
+     }
+ 
+   private:
+@@ -86,8 +86,8 @@ class BufferReader : public zip_archive::Reader {
+         mInputSize(inputSize) {
+     }
+ 
+-    bool ReadAtOffset(uint8_t* buf, size_t len, uint32_t offset) const {
+-        if (offset + len > mInputSize) {
++    bool ReadAtOffset(uint8_t* buf, size_t len, off64_t offset) const {
++        if (mInputSize < len || offset > mInputSize - len) {
+             return false;
+         }
+ 

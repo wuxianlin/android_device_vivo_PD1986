@@ -1,0 +1,68 @@
+name: twrp-build
+
+on:
+  push:
+    branches: [ twrp-11 ]
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    
+    steps:
+    - name: Clean Up
+      run: |
+        docker rmi `docker images -q`
+        sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/sudo apt/sources.list.d
+        sudo apt -y purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* mysql* php*
+        sudo apt update
+        sudo apt -y autoremove --purge
+        sudo apt clean
+        
+    - name: Update packages
+      run: |
+        sudo apt update
+        sudo apt full-upgrade
+        
+    - name: Install required packages
+      run: sudo apt install git-core gnupg flex bison gperf build-essential zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev libx11-dev tree lib32z-dev libgl1-mesa-dev libxml2-utils xsltproc unzip jq
+      
+    - name: Install Repo
+      run: |
+        mkdir ~/bin
+        curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+        chmod a+x ~/bin/repo
+ 
+    - name: Sync twrp
+      run: |
+        PATH=~/bin:$PATH
+        mkdir twrp
+        cd twrp
+        git config --global user.name "GitHub Action"
+        git config --global user.email "noreply@github.com"
+        repo init --depth=1 -u git://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git -b twrp-11
+        repo sync -j16
+        cp -f vendor/twrp/dummy/Android.mk frameworks/base/core/xsd/vts/Android.mk
+        cp -f vendor/twrp/dummy/Android.mk frameworks/base/services/core/xsd/vts/Android.mk
+
+    - name: Checkout device tree
+      uses: actions/checkout@v2
+      with:
+        path: twrp/device/vivo/PD1986
+
+    - name: Start Building
+      run: |
+        PATH=~/bin:$PATH
+        cd twrp
+        git -C frameworks/base apply ../../device/vivo/PD1986/patches/frameworks_base.patch
+        git -C system/core apply ../../device/vivo/PD1986/patches/system_core.patch
+        git -C build/make apply ../../device/vivo/PD1986/patches/build.patch
+        sed -i s/ZipEntry/ZipEntry64/g `grep -rl ZipEntry bootable/recovery/twrpinstall`
+        export ALLOW_MISSING_DEPENDENCIES=true
+        source build/envsetup.sh
+        lunch twrp_PD1986-eng 
+        mka recoveryimage -j4
+    
+    - uses: actions/upload-artifact@v2
+      with:
+        name: twrp.img
+        path: twrp/out/target/product/PD1986/recovery.img
