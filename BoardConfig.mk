@@ -48,7 +48,7 @@ TARGET_USES_UEFI := true
 # Platform
 TARGET_BOARD_PLATFORM := mt6885
 
-BOARD_KERNEL_CMDLINE += bootopt=64S3,32N2,64N2 product.version=PD1986_A_6.8.6 fingerprint.abbr=11/RP1A.200720.012 region_ver=W10
+BOARD_KERNEL_CMDLINE += bootopt=64S3,32N2,64N2 product.version=PD1986_A_6.8.13 fingerprint.abbr=11/RP1A.200720.012 region_ver=W10
 # androidboot.selinux=permissive
 BOARD_KERNEL_BASE := 0x40078000
 BOARD_RAMDISK_OFFSET := 0x07c08000
