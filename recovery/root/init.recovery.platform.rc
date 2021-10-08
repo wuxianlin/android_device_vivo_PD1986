@@ -43,6 +43,9 @@ on property:ro.crypto.state=unencrypted
     stop vendor.keymaster-4-0-trustonic
     stop gatekeeper-1-0
 
+on property:twrp.mount_to_decrypt=1
+    start twrpfbe
+
 service vendor.keymaster-4-0-trustonic /vendor/bin/hw/android.hardware.keymaster@4.0-service.trustonic
     user root
     group root drmrpc
@@ -58,6 +61,13 @@ service gatekeeper-1-0 /vendor/bin/android.hardware.gatekeeper@1.0-service
 service keystore_auth /system/bin/keystore_auth
     oneshot
     user system
+    group root
+    disabled
+    seclabel u:r:recovery:s0
+
+service twrpfbe /system/bin/twrpfbe !
+    oneshot
+    user root
     group root
     disabled
     seclabel u:r:recovery:s0
