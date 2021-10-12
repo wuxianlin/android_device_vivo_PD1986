@@ -55,7 +55,9 @@ jobs:
         cd twrp
         git -C frameworks/base apply ../../device/vivo/PD1986/patches/frameworks_base.patch
         git -C system/core apply ../../device/vivo/PD1986/patches/system_core.patch
+        #git -C build/make revert d693d939cb537366380767ee666f10a21c3adb03 --no-edit
         git -C build/make apply ../../device/vivo/PD1986/patches/build.patch
+        git -C build/make apply ../../device/vivo/PD1986/patches/0001-Revert-add-some-props-to-recoveryimage-footer.patch
         sed -i s/ZipEntry/ZipEntry64/g `grep -rl ZipEntry bootable/recovery/twrpinstall`
         export ALLOW_MISSING_DEPENDENCIES=true
         source build/envsetup.sh

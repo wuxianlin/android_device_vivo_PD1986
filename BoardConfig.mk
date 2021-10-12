@@ -135,3 +135,10 @@ TARGET_RECOVERY_PIXEL_FORMAT := RGBX_8888
 TW_INCLUDE_REPACKTOOLS := true
 TW_EXTRA_LANGUAGES := true
 TW_DEFAULT_LANGUAGE := zh_CN
+
+BOARD_AVB_RECOVERY_ADD_HASH_FOOTER_ARGS += \
+ --prop com.android.build.boot.os_version:$(PLATFORM_VERSION) \
+ --prop com.android.build.boot.security_patch:$(BOOT_SECURITY_PATCH) \
+ --prop com.android.build.system.os_version:$(PLATFORM_VERSION) \
+ --prop com.android.build.system.security_patch:$(PLATFORM_SECURITY_PATCH) \
+ --prop com.android.build.vendor.security_patch:$(VENDOR_SECURITY_PATCH)

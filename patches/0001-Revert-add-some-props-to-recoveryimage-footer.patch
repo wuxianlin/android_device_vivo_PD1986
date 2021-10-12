@@ -1,0 +1,28 @@
+From 5fe90449e9c7e9ead753ae10b7334b0d5bb037ae Mon Sep 17 00:00:00 2001
+From: wuxianlin <wuxianlinwxl@gmail.com>
+Date: Wed, 13 Oct 2021 07:11:50 +0800
+Subject: [PATCH] Revert "add some props to recoveryimage footer"
+
+This reverts commit d693d939cb537366380767ee666f10a21c3adb03.
+---
+ core/Makefile | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/core/Makefile b/core/Makefile
+index 4ee640630..65e84dc98 100644
+--- a/core/Makefile
++++ b/core/Makefile
+@@ -3495,9 +3495,7 @@ BOARD_AVB_VENDOR_BOOT_ADD_HASH_FOOTER_ARGS += \
+     --prop com.android.build.vendor_boot.fingerprint:$(BUILD_FINGERPRINT_FROM_FILE) \
+ 
+ BOARD_AVB_RECOVERY_ADD_HASH_FOOTER_ARGS += \
+-    --prop com.android.build.recovery.fingerprint:$(BUILD_FINGERPRINT_FROM_FILE) \
+-    --prop com.android.build.boot.os_version:$(PLATFORM_VERSION) \
+-    --prop com.android.build.boot.security_patch:$(PLATFORM_SECURITY_PATCH)
++    --prop com.android.build.recovery.fingerprint:$(BUILD_FINGERPRINT_FROM_FILE)
+ 
+ BOARD_AVB_VENDOR_ADD_HASHTREE_FOOTER_ARGS += \
+     --prop com.android.build.vendor.fingerprint:$(BUILD_FINGERPRINT_FROM_FILE) \
+-- 
+2.33.0
+
