@@ -27,6 +27,18 @@ on post-fs-data
     # Key Installation
     mkdir /data/vendor/key_provisioning 0771 system system
 
+# just boot in fastboot mode, fastbootd service need vendor.boot-hal-1-0 & health-hal-2-0
+on property:sys.usb.config=fastboot
+    start vendor.boot-hal-1-0
+    start health-hal-2-0
+
+on fs && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/configs/b.1/MaxPower 900
+    write /config/usb_gadget/g1/os_desc/use 1
+    write /config/usb_gadget/g1/os_desc/b_vendor_code 0x1
+    write /config/usb_gadget/g1/os_desc/qw_sign "MSFT100"
+    symlink /config/usb_gadget/g1/configs/b.1 /config/usb_gadget/g1/os_desc/b.1
+
 on property:hwservicemanager.ready=true
     start vendor.keymaster-4-0-trustonic
     start gatekeeper-1-0
@@ -77,6 +89,18 @@ service keystore /system/bin/keystore /tmp/misc/keystore
     user root
     group root drmrpc readproc
     disabled
+    seclabel u:r:recovery:s0
+
+service vendor.boot-hal-1-0 /vendor/bin/hw/android.hardware.boot@1.0-service
+    disabled
+    user root
+    group root
+    seclabel u:r:recovery:s0
+
+service health-hal-2-0 /vendor/bin/hw/android.hardware.health@2.0-service
+    disabled
+    user root
+    group root
     seclabel u:r:recovery:s0
 
 #Start Daemon (Registry directories should already be present)
